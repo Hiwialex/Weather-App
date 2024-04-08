@@ -1,35 +1,29 @@
-function displayTemperature(response) {
-  let temperatureElement = document.querySelector("#current-temperature");
-  let temperature = Math.round(response.data.temperature.current);
-  let cityElement = document.querySelector("#current-city");
+import axios from "axios";
+function refreshWeather(response) {
+  let temperatureElement = document.querySelector("#temperature");
+  let temperatureValue = Math.round(response.data.temperature.current);
+  temperatureElement.innerHTML = temperatureValue;
+  let descriptionElement = document.querySelector("#description");
+  let weatherDescription = response.data.condition.description;
+  descriptionElement.innerHTML = weatherDescription;
+  let humidityElement = document.querySelector("#humidity");
+  let weatherHumidity = response.data.temperature.humidity;
+  humidityElement.innerHTML = `${weatherHumidity}%`;
+  let windElement = document.querySelector("#wind");
+  let weatherWind = response.data.wind.speed;
+  windElement.innerHTML = `${weatherWind} km/h`;
+  let cityElement = document.querySelector("#city-name");
   cityElement.innerHTML = response.data.city;
-  temperatureElement.innerHTML = temperature;
+  let timeElement = document.querySelector("#time");
+  let date = new Date(response.data.time * 1000);
+  timeElement.innerHTML = formatDate(date);
+  let weatherIconElement = document.querySelector("#icon");
+  let iconURL = `<img src="${response.data.condition.icon_url}" class="weather-app-icon" />`;
+  weatherIconElement.innerHTML = iconURL;
 }
-
-function search(event) {
-  event.preventDefault();
-  let searchInputElement = document.querySelector("#search-input");
-  let city = searchInputElement.value;
-
-  let apiKey = "b2a5adcct04b33178913oc335f405433";
-  let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=metric`;
-
-  axios.get(apiUrl).then(displayTemperature);
-}
-
 function formatDate(date) {
   let minutes = date.getMinutes();
   let hours = date.getHours();
-  let day = date.getDay();
-
-  if (minutes < 10) {
-    minutes = `0${minutes}`;
-  }
-
-  if (hours < 10) {
-    hours = `0${hours}`;
-  }
-
   let days = [
     "Sunday",
     "Monday",
@@ -37,17 +31,57 @@ function formatDate(date) {
     "Wednesday",
     "Thursday",
     "Friday",
-    "Saturday"
+    "Saturday",
   ];
-
-  let formattedDay = days[day];
-  return `${formattedDay} ${hours}:${minutes}`;
+  let day = days[date.getDay()];
+  if (minutes < 10) {
+    minutes = `0${minutes}`;
+  }
+  return `${day} ${hours}:${minutes}`;
 }
 
-let searchForm = document.querySelector("#search-form");
-searchForm.addEventListener("submit", search);
+function searchCity(city) {
+  let apiKey = "obb280ec02a9c3c6acfft3e6a806344e";
+  let apiUrl = `//api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=metric`;
+  http: axios.get(apiUrl).then(refreshWeather);
+}
+function handleSearchSubmit(event) {
+  event.preventDefault();
+  let searchInput = document.querySelector("#search-form-input");
+  searchCity(searchInput.value);
+}
 
-let currentDateELement = document.querySelector("#current-date");
-let currentDate = new Date();
+function displayForecast() {
+  let days = [`Tue`, `Wed`, `Thu`, `Fri`, `Sat`];
+  let forecastHTML = "";
 
-currentDateELement.innerHTML = formatDate(currentDate);
+  days.forEach(function (day) {
+    forecastHTML =
+      forecastHTML +
+      `
+          <div class="row">
+            <div class="column">
+              <div class="weather-forecast-date">${day}</div>
+              <img
+                src="http://shecodes-assets.s3.amazonaws.com/api/weather/icons/rain-day.png"
+                alt=""
+                width="50"
+              />
+              <div class="weather-forecast-temperature">
+                <span class="weather-forecast-temperature-max">18° </span>
+                <span class="weather-forecast-temperature-min"> / 12°</span>
+              </div>
+            </div>
+          </div>
+`;
+  });
+
+  let forecastElement = document.querySelector("#forecast");
+  forecastElement.innerHTML = forecastHTML;
+}
+
+let searchFormElement = document.querySelector("#search-form");
+searchFormElement.addEventListener("submit", handleSearchSubmit);
+
+searchCity("city");
+displayForecast();
