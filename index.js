@@ -1,4 +1,3 @@
-import axios from "axios";
 function refreshWeather(response) {
   let temperatureElement = document.querySelector("#temperature");
   let temperatureValue = Math.round(response.data.temperature.current);
@@ -83,5 +82,5 @@ function displayForecast() {
 let searchFormElement = document.querySelector("#search-form");
 searchFormElement.addEventListener("submit", handleSearchSubmit);
 
-searchCity("city");
+searchCity("Paris");
 displayForecast();
